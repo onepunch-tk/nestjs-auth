@@ -14,6 +14,7 @@ export const users = pgTable('users', {
   resetToken: text('reset_token'),
   resetTokenExpiresAt: timestamp('reset_token_expires_at', { withTimezone: true }),
   refreshTokenHash: text('refresh_token_hash'),
+  refreshTokenExpiresAt: timestamp('refresh_token_expires_at', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
