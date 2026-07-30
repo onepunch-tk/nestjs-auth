@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { DBModule } from './db/db.module';
+import { UserModule } from './users/user.module';
 
 @Module({
   imports: [
@@ -9,6 +10,7 @@ import { DBModule } from './db/db.module';
       expandVariables: true,
     }),
     DBModule,
+    UserModule,
   ],
   controllers: [],
   providers: [],
