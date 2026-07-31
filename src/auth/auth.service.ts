@@ -116,7 +116,7 @@ export class AuthService {
     };
   }
 
-  async refresh(refreshToken: string, res: Response) {
+  async refresh(refreshToken: string | undefined, res: Response) {
     const UNAUTHORIZED_MESSAGE = '로그인이 만료되었습니다. 다시 로그인해주세요.';
 
     if (!refreshToken) {

@@ -15,7 +15,7 @@ export class EmailService {
     const verificationUrl = `${appUrl}/api/auth/verify-email?token=${token}`;
 
     await this.resend.emails.send({
-      from: 'hello@tkstar.dev',
+      from: 'tkstar.dev <hello@tkstar.dev>',
       to: email,
       subject: '[tkstar.dev] 이메일 인증을 완료해주세요',
       html: `
@@ -62,7 +62,7 @@ export class EmailService {
     const resetUrl = `${appUrl}/api/auth/reset-password?token=${token}`;
 
     await this.resend.emails.send({
-      from: 'hello@tkstar.dev',
+      from: 'tkstar.dev <hello@tkstar.dev>',
       to: email,
       subject: '[tkstar.dev] 비밀번호 재설정 안내',
       html: `
