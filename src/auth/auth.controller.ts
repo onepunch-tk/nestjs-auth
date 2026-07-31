@@ -5,8 +5,10 @@ import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Public } from '@/common/decorators/public.decorator';
 import type { User } from '@/db/db.type';
 import { AuthService } from './auth.service';
+import { ForgorPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -70,5 +72,23 @@ export class AuthController {
       role: user.role,
       isVerified: user.isVerified,
     };
+  }
+
+  // POST /api/auth/forgot-password
+  @Public()
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: '패스워드 재설정 요청' })
+  async forgotPassword(@Body() dto: ForgorPasswordDto) {
+    return await this.authService.forgotPassword(dto.email);
+  }
+
+  // POST /api/auth/reset-password
+  @Public()
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: '이메일 인증 & 패스워드 재설정' })
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    return await this.authService.resetPassword(dto.token, dto.password);
   }
 }

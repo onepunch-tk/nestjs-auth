@@ -155,6 +155,62 @@ export class AuthService {
     const tokens = await this.generateTokens(user, remainingSeconds);
     await this.saveRefrashToken(user.id, tokens.refreshToken);
     this.setRefreshTokenCookie(res, tokens.refreshToken);
+
+    return {
+      accessToken: tokens.accessToken,
+    };
+  }
+
+  async forgotPassword(email: string) {
+    const RESET_CODE_MESSAGE =
+      '입력하신 이메일로 비밀번호 재설정 코드를 보냈습니다. 메일함을 확인해주세요.';
+    const user = await this.userService.findByEmail(email);
+
+    if (!user) {
+      return {
+        message: RESET_CODE_MESSAGE,
+      };
+    }
+
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetTokenExpiresAt = new Date(Date.now() + 60 * 60 * 1000); //1시간 만료
+
+    await this.userService.update(user.id, {
+      resetToken,
+      resetTokenExpiresAt,
+    });
+
+    this.emailService.sendPasswordResetEmail(user.email, resetToken);
+
+    return {
+      message: RESET_CODE_MESSAGE,
+    };
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    const user = await this.userService.findByResetToken(token);
+
+    if (!user?.resetToken) {
+      throw new BadRequestException('유효하지 않은 재설정 코드입니다.');
+    }
+
+    if (user.resetTokenExpiresAt && user.resetTokenExpiresAt < new Date()) {
+      throw new BadRequestException(
+        '재설정 코드가 만료되었습니다. 비밀번호 재설정을 다시 요청해주세요.',
+      );
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 12);
+
+    await this.userService.update(user.id, {
+      resetToken: null,
+      resetTokenExpiresAt: null,
+      passwordHash,
+    });
+
+    return {
+      message: '비밀번호 재설정이 완료되었습니다. 다시 로그인해주세요.',
+    };
   }
 
   async logout(userId: string, res: Response) {

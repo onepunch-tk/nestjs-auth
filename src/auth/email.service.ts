@@ -58,9 +58,6 @@ export class EmailService {
   }
 
   async sendPasswordResetEmail(email: string, token: string) {
-    const appUrl = this.configService.get<string>('APP_URL');
-    const resetUrl = `${appUrl}/api/auth/reset-password?token=${token}`;
-
     await this.resend.emails.send({
       from: 'tkstar.dev <hello@tkstar.dev>',
       to: email,
@@ -76,21 +73,20 @@ export class EmailService {
             <tr>
               <td style="padding:0 32px 32px; text-align:center; color:#555555; font-size:15px; line-height:1.6;">
                 안녕하세요!<br/>
-                아래 버튼을 눌러 비밀번호를 재설정해주세요.<br/>
-                <span style="color:#e53935;">이 링크는 1시간 후 만료됩니다.</span>
+                아래 재설정 코드를 복사해 비밀번호 재설정 화면에 붙여넣어 주세요.<br/>
+                <span style="color:#e53935;">이 코드는 1시간 후 만료됩니다.</span>
               </td>
             </tr>
             <tr>
-              <td style="padding:0 32px 32px; text-align:center;">
-                <a href="${resetUrl}" style="display:inline-block; padding:14px 32px; background-color:#111111; color:#ffffff; text-decoration:none; border-radius:8px; font-size:15px; font-weight:600;">
-                  비밀번호 재설정하기
-                </a>
+              <td style="padding:0 32px 32px;">
+                <div style="padding:16px; background-color:#f4f4f7; border:1px solid #e4e4e7; border-radius:8px; text-align:center; font-family:Consolas,Menlo,monospace; font-size:13px; line-height:1.6; color:#111111; word-break:break-all;">
+                  ${token}
+                </div>
               </td>
             </tr>
             <tr>
               <td style="padding:0 32px 40px; text-align:center; color:#999999; font-size:13px; line-height:1.6;">
-                버튼이 눌리지 않는다면 아래 링크를 복사해 브라우저에 붙여넣어 주세요.<br/>
-                <a href="${resetUrl}" style="color:#999999; word-break:break-all;">${resetUrl}</a>
+                코드 전체를 빠짐없이 복사해주세요. 줄바꿈이나 공백이 섞이면 인식되지 않습니다.
               </td>
             </tr>
             <tr>
