@@ -5,7 +5,7 @@ import type { DrizzleDB, NewUser } from '@/db/db.type';
 import { users } from '@/db/schema';
 
 @Injectable()
-export class UserService {
+export class UsersService {
   constructor(@Inject(DRIZZLE) private readonly db: DrizzleDB) {}
 
   async findByResetToken(token: string) {

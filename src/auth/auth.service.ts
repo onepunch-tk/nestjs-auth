@@ -10,7 +10,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import type { Response } from 'express';
 import type { User } from '@/db/db.type';
-import { UserService } from '@/users/user.service';
+import { UsersService } from '@/users/users.service';
 import type { LoginDto } from './dto/login.dto';
 import type { RegisterDto } from './dto/register.dto';
 import { EmailService } from './email.service';
@@ -18,14 +18,14 @@ import { EmailService } from './email.service';
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly userService: UserService,
+    private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly emailService: EmailService,
   ) {}
 
   async register(dto: RegisterDto) {
-    const existingUser = await this.userService.findByEmail(dto.email);
+    const existingUser = await this.usersService.findByEmail(dto.email);
 
     if (existingUser) {
       throw new ConflictException('사용 중인 이메일입니다.');
@@ -36,7 +36,7 @@ export class AuthService {
     const verificationToken = crypto.randomBytes(32).toString('hex');
     const verificationTokenExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); //24시간
 
-    const user = await this.userService.create({
+    const user = await this.usersService.create({
       email: dto.email,
       name: dto.name,
       passwordHash,
@@ -52,7 +52,7 @@ export class AuthService {
   }
 
   async verifyEmail(token: string, res: Response) {
-    const user = await this.userService.findByVerificationToken(token);
+    const user = await this.usersService.findByVerificationToken(token);
 
     if (!user?.verificationToken) {
       throw new BadRequestException('유효하지 않은 인증 링크입니다.');
@@ -62,7 +62,7 @@ export class AuthService {
       throw new BadRequestException('인증 링크가 만료되었습니다. 인증 메일을 다시 요청해주세요.');
     }
 
-    await this.userService.update(user.id, {
+    await this.usersService.update(user.id, {
       isVerified: true,
       verificationToken: null,
       verificationTokenExpiresAt: null,
@@ -85,7 +85,7 @@ export class AuthService {
   }
 
   async login(dto: LoginDto, res: Response) {
-    const user = await this.userService.findByEmail(dto.email);
+    const user = await this.usersService.findByEmail(dto.email);
 
     if (!user) {
       throw new UnauthorizedException('이메일 or 패스워드를 확인하세요.');
@@ -132,7 +132,7 @@ export class AuthService {
       throw new UnauthorizedException(UNAUTHORIZED_MESSAGE);
     }
 
-    const user = await this.userService.findById(payload.sub);
+    const user = await this.usersService.findById(payload.sub);
 
     if (!user?.refreshTokenHash) {
       throw new UnauthorizedException(UNAUTHORIZED_MESSAGE);
@@ -164,7 +164,7 @@ export class AuthService {
   async forgotPassword(email: string) {
     const RESET_CODE_MESSAGE =
       '입력하신 이메일로 비밀번호 재설정 코드를 보냈습니다. 메일함을 확인해주세요.';
-    const user = await this.userService.findByEmail(email);
+    const user = await this.usersService.findByEmail(email);
 
     if (!user) {
       return {
@@ -175,7 +175,7 @@ export class AuthService {
     const resetToken = crypto.randomBytes(32).toString('hex');
     const resetTokenExpiresAt = new Date(Date.now() + 60 * 60 * 1000); //1시간 만료
 
-    await this.userService.update(user.id, {
+    await this.usersService.update(user.id, {
       resetToken,
       resetTokenExpiresAt,
     });
@@ -188,7 +188,7 @@ export class AuthService {
   }
 
   async resetPassword(token: string, newPassword: string) {
-    const user = await this.userService.findByResetToken(token);
+    const user = await this.usersService.findByResetToken(token);
 
     if (!user?.resetToken) {
       throw new BadRequestException('유효하지 않은 재설정 코드입니다.');
@@ -202,7 +202,7 @@ export class AuthService {
 
     const passwordHash = await bcrypt.hash(newPassword, 12);
 
-    await this.userService.update(user.id, {
+    await this.usersService.update(user.id, {
       resetToken: null,
       resetTokenExpiresAt: null,
       passwordHash,
@@ -214,7 +214,7 @@ export class AuthService {
   }
 
   async logout(userId: string, res: Response) {
-    await this.userService.update(userId, { refreshTokenHash: null, refreshTokenExpiresAt: null });
+    await this.usersService.update(userId, { refreshTokenHash: null, refreshTokenExpiresAt: null });
     res.clearCookie('refresh_token');
 
     return { message: '정상적으로 로그아웃되었습니다.' };
@@ -244,7 +244,7 @@ export class AuthService {
     const refreshTokenHash = await bcrypt.hash(refreshToken, 10);
     // exp는 서명할 때 이미 계산된 절대 시각 — 여기선 다시 읽기만 함
     const { exp } = this.jwtService.decode<{ exp: number }>(refreshToken);
-    await this.userService.update(userId, {
+    await this.usersService.update(userId, {
       refreshTokenHash,
       refreshTokenExpiresAt: new Date(exp * 1000), // exp는 초 단위라 Date용 ms로 변환
     });

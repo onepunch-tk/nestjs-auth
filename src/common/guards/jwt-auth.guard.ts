@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-import { UserService } from '@/users/user.service';
+import { UsersService } from '@/users/users.service';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
 @Injectable()
@@ -12,7 +12,7 @@ export class JwtAuthGuard implements CanActivate {
     private readonly reflector: Reflector,
     readonly jwtService: JwtService,
     readonly configService: ConfigService,
-    readonly userService: UserService,
+    readonly usersService: UsersService,
   ) {}
 
   async canActivate(ctx: ExecutionContext): Promise<boolean> {
@@ -40,7 +40,7 @@ export class JwtAuthGuard implements CanActivate {
       throw new UnauthorizedException('존재하지 않는 사용자입니다.');
     }
 
-    const user = await this.userService.findById(payload.sub);
+    const user = await this.usersService.findById(payload.sub);
 
     if (!user) {
       throw new UnauthorizedException('존재하지 않는 사용자입니다.');

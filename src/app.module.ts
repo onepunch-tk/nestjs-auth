@@ -5,7 +5,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { DBModule } from './db/db.module';
-import { UserModule } from './users/user.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -15,7 +15,7 @@ import { UserModule } from './users/user.module';
     }),
     DBModule,
     JwtModule.register({ global: true }),
-    UserModule,
+    UsersModule,
     AuthModule,
   ],
   controllers: [],
